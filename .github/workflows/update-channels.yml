@@ -1,0 +1,27 @@
+name: Update Vavoo Channels
+
+on:
+  schedule:
+    - cron: '0 */6 * * *' # Her 6 saatte bir günceller
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Fetch Channels from Vavoo
+        run: |
+          curl -s "https://vavoo.to/v2/channels" \
+            -H "User-Agent: VAVOO/2.6" \
+            -H "Accept: application/json" > channels.json
+
+      - name: Commit and Push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add channels.json
+          git commit -m "Auto-update channels.json" || exit 0
+          git push
